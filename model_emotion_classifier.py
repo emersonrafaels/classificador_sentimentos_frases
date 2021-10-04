@@ -342,13 +342,16 @@ class Emotion_Classifier():
             validador = True
 
         except Exception as ex:
-            print(ex)
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
         return validador, model
 
 
     @staticmethod
     def start_train_model(model, model_data, epochs, batch_size):
+
+        # INICIANDO O VALIDADOR
+        validador = False
 
         # INICIANDO A LISTA QUE ARMAZENARÁ O RESULTADO DE CADA
         # INTERAÇÃO DE TREINAMENTO DO MODELO
@@ -360,26 +363,32 @@ class Emotion_Classifier():
 
         model.begin_training()
 
-        for epoch in range(epochs):
+        try:
+            for epoch in range(epochs):
 
-            # EMBARALHANDO OS DADOS
-            # ISSO REORGANIZARÁ A ORDEM DOS ITENS DOS DADOS DE TREINAMENTO
-            random.shuffle(model_data)
+                # EMBARALHANDO OS DADOS
+                # ISSO REORGANIZARÁ A ORDEM DOS ITENS DOS DADOS DE TREINAMENTO
+                random.shuffle(model_data)
 
-            # PERCORRENDO CADA UM DOS BATCHS
-            # QUANTIDADE DE BATCHS = TAMANHO_DO_MODELO/BATCHS_SIZE
-            for batch in spacy.util.minibatch(model_data, batch_size):
-                textos = [model(texto) for texto, entities in batch]
-                annotations = [{'cats': entities} for texto, entities in batch]
-                model.update(textos, annotations, losses=losses)
+                # PERCORRENDO CADA UM DOS BATCHS
+                # QUANTIDADE DE BATCHS = TAMANHO_DO_MODELO/BATCHS_SIZE
+                for batch in spacy.util.minibatch(model_data, batch_size):
+                    textos = [model(texto) for texto, entities in batch]
+                    annotations = [{'cats': entities} for texto, entities in batch]
+                    model.update(textos, annotations, losses=losses)
 
-            # A CADA
-            if epoch % 10 == 0:
-                print(losses)
-                result_epochs_history.append(losses)
-                result_epochs_history_losses.append(losses.get("textcat"))
+                # A CADA
+                if epoch % 10 == 0:
+                    print(losses)
+                    result_epochs_history.append(losses)
+                    result_epochs_history_losses.append(losses.get("textcat"))
 
-        return result_epochs_history, result_epochs_history_losses
+            validador = True
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return validador, result_epochs_history, result_epochs_history_losses
 
 
     @staticmethod
@@ -401,13 +410,15 @@ class Emotion_Classifier():
         if validador:
 
             # REALIZANDO O TREINAMENTO
-            history_epochs, history_losses = Emotion_Classifier.start_train_model(model, model_data, epochs, batch_size)
+            validador, history_epochs, history_losses = Emotion_Classifier.start_train_model(model, model_data, epochs, batch_size)
 
             print(history_epochs)
             print(history_losses)
 
             # VISUALIZANDO A PROGRESSÃO DOS ERROS
             Emotion_Classifier.view_losses(history_losses)
+
+        return validador, history_epochs
 
 
     @staticmethod
