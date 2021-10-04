@@ -1,6 +1,7 @@
 from dynaconf import settings
 
 from model_emotion_classifier import Emotion_Classifier
+from UTILS import generic_functions
 
 
 def orchestra_model():
@@ -22,9 +23,17 @@ def orchestra_model():
         if validador:
 
             # REALIZANDO O TREINAMENTO DO MODELO
-            result_model = orchest_model.orchestra_create_classifier(result_pre_processing,
-                                                                     settings.EPOCHS,
-                                                                     settings.BATCH_SIZE)
+            validador, model, result_model = orchest_model.orchestra_create_classifier(result_pre_processing,
+                                                                                       settings.EPOCHS,
+                                                                                       settings.BATCH_SIZE)
+
+            if validador:
+
+                # SALVANDO O MODELO PARA USO FUTURO
+                validador = orchest_model.save_model(model, settings.DIR_SAVE)
+
+                if validador:
+                    print("MODELO TREINADO COM SUCESSO - {}".format(generic_functions.obtem_date_time))
 
 
 if __name__ == '__main__':

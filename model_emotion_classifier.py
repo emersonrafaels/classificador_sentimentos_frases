@@ -379,7 +379,6 @@ class Emotion_Classifier():
 
                 # A CADA
                 if epoch % 10 == 0:
-                    print(losses)
                     result_epochs_history.append(losses)
                     result_epochs_history_losses.append(losses.get("textcat"))
 
@@ -388,7 +387,7 @@ class Emotion_Classifier():
         except Exception as ex:
             print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
-        return validador, result_epochs_history, result_epochs_history_losses
+        return validador, model, result_epochs_history, result_epochs_history_losses
 
 
     @staticmethod
@@ -410,15 +409,32 @@ class Emotion_Classifier():
         if validador:
 
             # REALIZANDO O TREINAMENTO
-            validador, history_epochs, history_losses = Emotion_Classifier.start_train_model(model, model_data, epochs, batch_size)
-
-            print(history_epochs)
-            print(history_losses)
+            validador, model, history_epochs, history_losses = Emotion_Classifier.start_train_model(model,
+                                                                                                    model_data,
+                                                                                                    epochs,
+                                                                                                    batch_size)
 
             # VISUALIZANDO A PROGRESSÃO DOS ERROS
             Emotion_Classifier.view_losses(history_losses)
 
-        return validador, history_epochs
+        return validador, model, history_epochs
+
+
+    @staticmethod
+    def save_model(model_to_save, dir_save):
+
+        # INICIANDO O VALIDADOR
+        validador = False
+
+        try:
+            # SALVANDO O MODELO
+            model_to_save.to_disk(dir_save)
+
+            validador = True
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return validador
 
 
     @staticmethod

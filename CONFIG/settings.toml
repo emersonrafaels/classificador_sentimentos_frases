@@ -23,4 +23,6 @@ BATCH_SIZE = 30
 TEXT_CAT = "textcat"
 MODEL_LABEL = ["ALEGRIA", "MEDO"]
 
+DIR_SAVE = "RESULTADOS/MODEL"
+
 [development]
