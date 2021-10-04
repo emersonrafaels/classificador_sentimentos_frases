@@ -1,4 +1,4 @@
-from pandas import read_csv
+from dynaconf import settings
 
 from model_emotion_classifier import Emotion_Classifier
 
@@ -6,9 +6,14 @@ from model_emotion_classifier import Emotion_Classifier
 def orchestra_model():
 
     # OBTENDO A BASE DE DADOS
-    caminho_base = "BASES/BASE_TREINAMENTO.txt"
-    base_dados = read_csv(caminho_base)
+    path_data_train_dir = settings.PATH_DATA_TRAIN
 
-    result_pre_processing = Emotion_Classifier.orchestra_pre_processing_model(base_dados)
+    train_database = Emotion_Classifier.read_csv(path_data_train_dir)
+
+    result_pre_processing = Emotion_Classifier.orchestra_pre_processing_model(train_database)
 
     result_model = Emotion_Classifier.orchestra_create_classifier(result_pre_processing, 1000, 30)
+
+
+if __name__ == '__main__':
+    orchestra_model()

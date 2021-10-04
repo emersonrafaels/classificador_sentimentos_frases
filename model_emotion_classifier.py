@@ -1,6 +1,33 @@
+"""
+
+    CLASSIFICADOR DE EMOÇÕES UTILIZANDO FRASES EM PORTUGUÊS,
+    UTILIZANDO 100% OS MODELOS DE MACHINE LEARNING
+    DISPONIBILIZADOS PELO PRÓPRIO SPACY.
+
+    PARA PRÉ-PROCESSAMENTO SERÃO UTILIZADAS AS TÉCNICAS:
+        1) LEMATIZAÇÃO
+        2) STOP WORDS
+        3) TOKENIZAÇÃO.
+
+
+    # Arguments
+        path_data_train_dir            - Required : Base de dados de
+                                                    treinamento a ser utilizada (String)
+        path_data_test_dir             - Required : Base de dados de
+                                                    teste a ser utilizada (String)
+    # Returns
+
+
+"""
+
+__version__ = "1.0"
+__author__ = """Emerson V. Rafael (EMERVIN)"""
+__data_atualizacao__ = "03/07/2021"
+
 import random
 import string
 
+from dynaconf import settings
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,7 +41,7 @@ class Emotion_Classifier():
     def __init__(self):
 
         # 1 - DEFININDO A LINGUAGEM UTILIZADA NO MODELO
-        self.language = "portuguese"
+        self.language = settings.LANGUAGE
 
         # 2 - OBTENDO AS PONTUAÇÕES QUE SERÃO RETIRADAS DO MODELO
         self.pontuacoes = string.punctuation
