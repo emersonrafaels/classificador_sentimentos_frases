@@ -7,16 +7,17 @@
     PARA PRÉ-PROCESSAMENTO SERÃO UTILIZADAS AS TÉCNICAS:
         1) LEMATIZAÇÃO
         2) STOP WORDS
-        3) TOKENIZAÇÃO.
+        3) RETIRAR PONTUAÇÕES
+        4) TOKENIZAÇÃO.
 
 
     # Arguments
         path_data_train_dir            - Required : Base de dados de
                                                     treinamento a ser utilizada (String)
-        path_data_test_dir             - Required : Base de dados de
+        path_data_test_dir             - Optional : Base de dados de
                                                     teste a ser utilizada (String)
     # Returns
-
+        model_result                   - Required : Resultado do modelo (Model)
 
 """
 
@@ -24,6 +25,8 @@ __version__ = "1.0"
 __author__ = """Emerson V. Rafael (EMERVIN)"""
 __data_atualizacao__ = "03/07/2021"
 
+
+from inspect import stack
 import random
 import string
 
@@ -48,18 +51,81 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def read_csv(caminho_base):
+    def read_csv(data_dir):
 
-        return pd.read_csv(caminho_base, encoding='utf-8')
+        """
+
+            REALIZA LEITURA DA BASE (CSV)
+
+            # Arguments
+                path_data_train_dir            - Required : Base de dados de
+                                                            treinamento a ser utilizada (String)
+                path_data_test_dir             - Optional : Base de dados de
+                                                            teste a ser utilizada (String)
+            # Returns
+                validador                      - Required : Validação da função (Boolean)
+                model_result                   - Required : Resultado do modelo (Model)
+
+        """
+
+        # INICIANDO O VALIDADOR
+        validador = False
+
+        # INICIANDO O DATAFRAME DE RESULTADO DA LEITURA
+        dataframe = pd.DataFrame()
+
+        try:
+            dataframe = pd.read_csv(data_dir, encoding='utf-8')
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return validador, dataframe
 
 
     @staticmethod
     def get_infos_base(dataframe):
 
-        print(dataframe.shape)
+        """
+
+            OBTÉM A QUANTIDADE DE LINHAS E COLUNAS DA BASE
+
+            # Arguments
+                dataframe                       - Required : Base de dados (DataFrame)
+
+            # Returns
+                validador                       - Required : Validação da função (Boolean)
+                dataframe_shape                 - Required : Linhas e colunas do dataframe (Tuple)
+
+        """
+
+        # INICIANDO O VALIDADOR
+        validador = False
+
+        # INICIANDO O DATAFRAME DE RESULTADO DA LEITURA
+        dataframe_shape = (None, None)
+
+        try:
+            if isinstance(dataframe, pd.DataFrame):
+                dataframe_shape = dataframe.shape
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return validador, dataframe_shape
 
 
     def get_spacy_model(self):
+
+        """
+
+            INICIA O MODELO SPACY COM BASE NA LINGUAGEM DEFINIDA.
+
+            # Arguments
+
+            # Returns
+                validador                       - Required : Validação da função (Boolean)
+                pln                             - Required : Modelo spacy (Spacy)
+
+        """
 
         # INICIANDO O VALIDADOR
         validador = False
@@ -79,14 +145,35 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def pre_processing_dataframe(pln, texto, pontuacoes):
+    def pre_processing_dataframe(pln, text, pontuactions):
+
+        """
+
+            REALIZA O PRÉ PROCESSAMENTO DO DATAFRAME.
+
+            PARA PRÉ-PROCESSAMENTO SERÃO UTILIZADAS AS TÉCNICAS:
+                1) LEMATIZAÇÃO
+                2) STOP WORDS
+                3) RETIRAR PONTUAÇÕES
+                4) TOKENIZAÇÃO.
+
+            # Arguments
+                pln                             - Required : Modelo spacy (Spacy)
+                text                            - Required : Texto para realizar o pré-processamento (String)
+                pontuactions                    - Required : Pontuações a serem retiradas (List)
+
+            # Returns
+                validador                       - Required : Validação da função (Boolean)
+                pln                             - Required : Modelo spacy (Spacy)
+
+        """
 
         # INICIANDO A LISTA QUE ARMAZENARÁ AS LEMMATIZAÇÕES
         lista = []
 
         # CONVERTENDO O TEXTO PARA LOWERCASE
         # É IMPORTANTE ESSE PADRÃO, PARA O SPACY RECONHECER OS TOKENS
-        texto = texto.lower()
+        texto = text.lower()
         documento = pln(texto)
 
         # PERCORRENDO TODOS OS TOKENS E OBTENDO AS LEMMARIZAÇÕES
@@ -95,7 +182,7 @@ class Emotion_Classifier():
             lista.append(token.lemma_)
 
         # RETIRANDO STOP WORDS, PONTUAÇÕES E NÚMEROS
-        texto_formatted = ' '.join([palavra for palavra in lista if palavra not in STOP_WORDS and palavra not in pontuacoes and not palavra.isdigit()])
+        texto_formatted = ' '.join([palavra for palavra in lista if palavra not in STOP_WORDS and palavra not in pontuactions and not palavra.isdigit()])
 
         return texto_formatted
 
