@@ -49,6 +49,14 @@ class Emotion_Classifier():
         # 2 - OBTENDO AS PONTUAÇÕES QUE SERÃO RETIRADAS DO MODELO
         self.pontuacoes = string.punctuation
 
+        # 3 - NOME DAS COLUNAS DO DATAFRAME
+        self.column_text = settings.NAME_COLUMN_TEXT
+        self.column_emotion = settings.NAME_COLUMN_EMOTION
+
+        # 4 - NOME DAS COLUNAS QUE RECEBERÁO OS RESULTADOS DE PRÉ PROCESSAMENTO
+        self.variables = settings.VARIABLES = "texto_formatado"
+        self.target = settings.TARGET = "emocao_formatado"
+
 
     @staticmethod
     def read_csv(data_dir):
@@ -76,6 +84,8 @@ class Emotion_Classifier():
 
         try:
             dataframe = pd.read_csv(data_dir, encoding='utf-8')
+
+            validador = True
         except Exception as ex:
             print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
@@ -131,7 +141,7 @@ class Emotion_Classifier():
         validador = False
 
         # INICIANDO O MODELO DO SPACY
-        pln = spacy.blank()
+        pln = None
 
         # OBTENDO O MODELO
         if self.language == "portuguese":
@@ -145,7 +155,7 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def pre_processing_dataframe(pln, text, pontuactions):
+    def pre_processing_dataframe(text, pln, pontuactions):
 
         """
 
@@ -158,8 +168,8 @@ class Emotion_Classifier():
                 4) TOKENIZAÇÃO.
 
             # Arguments
-                pln                             - Required : Modelo spacy (Spacy)
                 text                            - Required : Texto para realizar o pré-processamento (String)
+                pln                             - Required : Modelo spacy (Spacy)
                 pontuactions                    - Required : Pontuações a serem retiradas (List)
 
             # Returns
@@ -188,41 +198,110 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def pre_processing_labels(emocao):
+    def pre_processing_labels(emotion):
+
+        """
+
+            FORMATANDO OS LABELS DOS TARGETS DO MODELO.
+
+            RETORNA UM DICIONÁRIO CONTENDO:
+                SE ALEGRIA, O DICT DEVE SER TRUE PARA ALEGRIA E FALSE PARA MEDO
+                SE ALEGRIA, O DICT DEVE SER TRUE PARA MEDO E FALSE PARA ALEGRIA.
+
+            # Arguments
+                emotion                             - Required : Emoção atual (String)
+
+            # Returns
+                result_label_dict                   - Required : Dict de target (Dict)
+
+        """
 
         # RETORNANDO UM DICT COM A EMOÇÃO
-        if emocao.lower() == "alegria":
+        if emotion.lower() == "alegria":
             return ({'ALEGRIA': True, 'MEDO': False})
-        elif emocao == 'medo':
+        elif emotion == 'medo':
             return ({'ALEGRIA': False, 'MEDO': True})
+        else:
+            return ({'ALEGRIA': False, 'MEDO': False})
 
 
     @staticmethod
-    def get_list_label_target(dataframe, label, target):
+    def get_dataframe_to_list_label_target(dataframe, variables, target):
 
-        return dataframe[[label, target]].values.tolist()
+        """
+
+            CONVERTENDO O DATAFRAME EM UMA LIST BIDIMENSIONAL.
+
+            1) RECEBE LABEL E TARGET
+            2) FILTRA APENAS AS COLUNAS DESEJADAS NO DATAFRAME
+            3) CONVERTE O DATAFRAME EM UMA LISTA BIDIMENSIONAL.
+
+            # Arguments
+                dataframe                       - Required : Dados para o modelo (DataFrame)
+                variables                       - Required : Variáveis para o modelo (String)
+                target                          - Required : Objetivo de cada conjunto de variáveis (String)
+
+            # Returns
+                result_label_dict                   - Required : Dict de target (Dict)
+
+        """
+
+        # INICIANDO O VALIDADOR
+        validador = False
+
+        # INICIANDO A LISTA BIDIMENSIONAL
+        list_data = []
+
+        # OBTENDO OS DADOS
+        try:
+            list_data = dataframe[[variables, target]].values.tolist()
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return validador, list_data
 
 
-    def orchestra_pre_processing_model(self, pln, dataframe):
+    def orchestra_pre_processing_model(self, dataframe):
+
+        """
+
+            ORQUESTRA O PRÉ PROCESSAMENTO DO DATAFRAME.
+
+            PARA PRÉ-PROCESSAMENTO SERÃO UTILIZADAS AS TÉCNICAS:
+                1) LEMATIZAÇÃO
+                2) STOP WORDS
+                3) RETIRAR PONTUAÇÕES
+                4) TOKENIZAÇÃO.
+
+            # Arguments
+                text                            - Required : Texto para realizar o pré-processamento (String)
+                pln                             - Required : Modelo spacy (Spacy)
+                pontuactions                    - Required : Pontuações a serem retiradas (List)
+
+            # Returns
+                validador                       - Required : Validação da função (Boolean)
+                pln                             - Required : Modelo spacy (Spacy)
+
+        """
 
         # INICIANDO O MODELO DO SPACY
         validador, pln = Emotion_Classifier.get_spacy_model(self)
 
         if validador:
 
-            label = "texto_formatado"
-            target = "emocao_formatado"
-
             # FORMATANDO OS TEXTOS
             # RETIRANDO PONTUAÇÕES E OBTENDO APENAS LEMMATIZAÇÃO
-            dataframe['texto_formatado'] = dataframe['texto'].apply(lambda x: Emotion_Classifier.pre_processing_dataframe(pln, x,
-                                                                                                                          self.pontuacoes))
-            dataframe['emocao_formatado'] = dataframe['emocao'].apply(lambda x: Emotion_Classifier.pre_processing_labels(x))
+            dataframe[self.variables] = np.vectorize(Emotion_Classifier.pre_processing_dataframe)(dataframe[self.column_text],
+                                                                                                     pln,
+                                                                                                     self.pontuacoes)
+            dataframe[self.target] = dataframe[self.column_emotion].apply(lambda x: Emotion_Classifier.pre_processing_labels(x))
 
             # OBTENDO UMA LISTA COM OS LABELS/TARGETS
-            list_label_target = Emotion_Classifier.get_list_label_target(dataframe, label, target)
+            list_data_model = Emotion_Classifier.get_dataframe_to_list_label_target(dataframe,
+                                                                                    self.variables,
+                                                                                    self.target)
 
-        return validador, list_label_target
+        return validador, list_data_model
 
 
     @staticmethod
