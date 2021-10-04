@@ -19,4 +19,8 @@ TARGET = "emocao_formatado"
 EPOCHS = 1000
 BATCH_SIZE = 30
 
+# DEFININDO OS LABELS DO MODELO
+TEXT_CAT = "textcat"
+MODEL_LABEL = ["ALEGRIA", "MEDO"]
+
 [development]

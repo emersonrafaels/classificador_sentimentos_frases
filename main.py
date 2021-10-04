@@ -17,12 +17,14 @@ def orchestra_model():
     if validador:
 
         # REALIZANDO O PRÉ-PROCESSAMENTO DA BASE DE TREINAMENTO
-        result_pre_processing = orchest_model.orchestra_pre_processing_model(train_database)
+        validador, result_pre_processing = orchest_model.orchestra_pre_processing_model(train_database)
 
-        # REALIZANDO O TREINAMENTO DO MODELO
-        result_model = orchest_model.orchestra_create_classifier(result_pre_processing,
-                                                                 settings.EPOCHS,
-                                                                 settings.BATCH_SIZE)
+        if validador:
+
+            # REALIZANDO O TREINAMENTO DO MODELO
+            result_model = orchest_model.orchestra_create_classifier(result_pre_processing,
+                                                                     settings.EPOCHS,
+                                                                     settings.BATCH_SIZE)
 
 
 if __name__ == '__main__':

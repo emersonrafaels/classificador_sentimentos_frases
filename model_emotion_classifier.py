@@ -255,6 +255,8 @@ class Emotion_Classifier():
         # OBTENDO OS DADOS
         try:
             list_data = dataframe[[variables, target]].values.tolist()
+
+            validador = True
         except Exception as ex:
             print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
@@ -297,9 +299,9 @@ class Emotion_Classifier():
             dataframe[self.target] = dataframe[self.column_emotion].apply(lambda x: Emotion_Classifier.pre_processing_labels(x))
 
             # OBTENDO UMA LISTA COM OS LABELS/TARGETS
-            list_data_model = Emotion_Classifier.get_dataframe_to_list_label_target(dataframe,
-                                                                                    self.variables,
-                                                                                    self.target)
+            validador, list_data_model = Emotion_Classifier.get_dataframe_to_list_label_target(dataframe,
+                                                                                               self.variables,
+                                                                                               self.target)
 
         return validador, list_data_model
 
@@ -307,29 +309,42 @@ class Emotion_Classifier():
     @staticmethod
     def init_model_classifier():
 
+        """
+
+            FUNÇÃO RESPONSÁVEL POR INICIALIZAR O MODELO VÁZIO
+            ESSE MODELO É INICIADO COM OS TARGETS.
+
+            # Arguments
+
+            # Returns
+                validador                       - Required : Validação da função (Boolean)
+                model                           - Required : Modelo spacy (Spacy)
+
+        """
+
         # INICIANDO O VALIDADOR DA FUNÇÃO
         validador = False
 
         # INICIANDO O MODELO
-        modelo = spacy.blank('pt')
+        model = spacy.blank('pt')
 
         try:
             # CREATE A PIPELINE
-            categorias = modelo.create_pipe("textcat")
+            categories = model.create_pipe(settings.TEXT_CAT)
 
             # ADICIONANDO OS LABELS DESEJADOS
-            categorias.add_label("ALEGRIA")
-            categorias.add_label("MEDO")
+            categories.add_label(settings.MODEL_LABEL[0])
+            categories.add_label(settings.MODEL_LABEL[1])
 
             # ADICIONANDO ESSES LABELS AO PIPELINE
-            modelo.add_pipe(categorias)
+            model.add_pipe(categories)
 
             validador = True
 
         except Exception as ex:
             print(ex)
 
-        return validador, modelo
+        return validador, model
 
 
     @staticmethod
@@ -364,7 +379,7 @@ class Emotion_Classifier():
                 result_epochs_history.append(losses)
                 result_epochs_history_losses.append(losses.get("textcat"))
 
-            return result_epochs_history, result_epochs_history_losses
+        return result_epochs_history, result_epochs_history_losses
 
 
     @staticmethod
@@ -380,7 +395,7 @@ class Emotion_Classifier():
     @staticmethod
     def orchestra_create_classifier(model_data, epochs, batch_size):
 
-        # INICIANDO O MODELO
+        # INICIANDO O MODELO VÁZIO
         validador, model = Emotion_Classifier.init_model_classifier()
 
         if validador:
