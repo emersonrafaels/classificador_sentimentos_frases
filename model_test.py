@@ -201,6 +201,10 @@ class Emotion_Test():
             dataframe[self.variables] = np.vectorize(Emotion_Test.pre_processing_dataframe)(dataframe[self.column_text],
                                                                                             pln,
                                                                                             self.punctuations)
+
+            # FORMATANDO AS EMOÇÕES PARA UPPERCASE
+            dataframe[self.column_emotion] = dataframe[self.column_emotion].apply(lambda x: str(x).upper())
+
         return validador, dataframe
 
 
