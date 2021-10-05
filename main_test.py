@@ -26,7 +26,7 @@ __data_atualizacao__ = "04/10/2021"
 from dynaconf import settings
 
 from model_test import Emotion_Test
-from UTILS import generic_functions
+from UTILS import generic_functions, get_test_metrics
 
 
 def orchestra_model(model, path_data_test_dir):
@@ -73,6 +73,11 @@ def orchestra_model(model, path_data_test_dir):
                 validador = generic_functions.save_excel(result_model, settings.DIR_RESULT_MODEL_SAVE)
 
                 if validador:
+
+                    # VISUALIZANDO AS MÉTRICAS DO MODELO
+                    print(get_test_metrics.get_test_report(result_model[settings.NAME_COLUMN_EMOTION],
+                                                           result_model[settings.PREDICTION_CLASS_COLUMN]))
+
                     print("MODELO TESTADO COM SUCESSO - {}".format(generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
 
 
