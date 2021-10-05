@@ -12,13 +12,11 @@ def read_csv(data_dir):
         REALIZA LEITURA DA BASE (CSV)
 
         # Arguments
-            path_data_train_dir            - Required : Base de dados de
-                                                        treinamento a ser utilizada (String)
-            path_data_test_dir             - Optional : Base de dados de
-                                                        teste a ser utilizada (String)
+            data_dir                      - Required : Diretório da base a ser lida (String)
+
         # Returns
-            validador                      - Required : Validação da função (Boolean)
-            model_result                   - Required : Resultado do modelo (Model)
+            validador                     - Required : Validação da função (Boolean)
+            dataframe                     - Required : Base lida (DataFrame)
 
     """
 
@@ -36,6 +34,34 @@ def read_csv(data_dir):
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
     return validador, dataframe
+
+
+def save_excel(dataframe_to_save, data_dir):
+
+    """
+
+        REALIZA SAVE DA BASE (CSV)
+
+        # Arguments
+            dataframe_to_save             - Required : Base a ser salva (DataFrame)
+            data_dir                      - Required : Diretório da base a ser salva (String)
+
+        # Returns
+            validador                     - Required : Validação da função (Boolean)
+
+    """
+
+    # INICIANDO O VALIDADOR
+    validador = False
+
+    try:
+        dataframe_to_save.to_excel(data_dir, index=None)
+
+        validador = True
+    except Exception as ex:
+        print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+    return validador
 
 
 def obtem_date_time(tipo_retorno):

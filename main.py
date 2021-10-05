@@ -85,7 +85,7 @@ def orchestra_model():
                 validador = orchest_model.save_model(model, settings.DIR_SAVE)
 
                 if validador:
-                    print("MODELO TREINADO COM SUCESSO - {}".format(generic_functions.obtem_date_time))
+                    print("MODELO TREINADO COM SUCESSO - {}".format(generic_functions.obtem_date_time("%d-%m-%Y %H:%M:%S")))
 
 
 if __name__ == '__main__':

@@ -54,8 +54,8 @@ class Emotion_Classifier():
         self.column_emotion = settings.NAME_COLUMN_EMOTION
 
         # 4 - NOME DAS COLUNAS QUE RECEBERÁO OS RESULTADOS DE PRÉ PROCESSAMENTO
-        self.variables = settings.VARIABLES = "texto_formatado"
-        self.target = settings.TARGET = "emocao_formatado"
+        self.variables = settings.VARIABLES
+        self.target = settings.TARGET
 
 
     @staticmethod
@@ -121,7 +121,7 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def pre_processing_dataframe(text, pln, pontuactions):
+    def pre_processing_dataframe(text, pln, punctuations):
 
         """
 
@@ -136,7 +136,7 @@ class Emotion_Classifier():
             # Arguments
                 text                            - Required : Texto para realizar o pré-processamento (String)
                 pln                             - Required : Modelo spacy (Spacy)
-                pontuactions                    - Required : Pontuações a serem retiradas (List)
+                punctuations                    - Required : Pontuações a serem retiradas (List)
 
             # Returns
                 validador                       - Required : Validação da função (Boolean)
@@ -150,17 +150,17 @@ class Emotion_Classifier():
         try:
             # CONVERTENDO O TEXTO PARA LOWERCASE
             # É IMPORTANTE ESSE PADRÃO, PARA O SPACY RECONHECER OS TOKENS
-            texto = text.lower()
-            documento = pln(texto)
+            text_lower = text.lower()
+            document = pln(text_lower)
 
             # PERCORRENDO TODOS OS TOKENS E OBTENDO AS LEMMARIZAÇÕES
             # OBTÉM A PALAVRA RAIZ
-            for token in documento:
+            for token in document:
                 lista.append(token.lemma_)
 
             # RETIRANDO STOP WORDS, PONTUAÇÕES E NÚMEROS
             texto_formatted = ' '.join([palavra for palavra in lista if
-                                        palavra not in STOP_WORDS and palavra not in pontuactions and not palavra.isdigit()])
+                                        palavra not in STOP_WORDS and palavra not in punctuations and not palavra.isdigit()])
 
             return texto_formatted
 
@@ -408,24 +408,5 @@ class Emotion_Classifier():
             print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
 
         return validador
-
-
-    @staticmethod
-    def get_entities(engine, text):
-
-        # PARSEANDO O TEXTO UTILIZANDO A ENGINE DE NLP
-        doc = engine(text)
-
-        for ent in doc.ents:
-            print(ent.text, ent.start_char, ent.end_char, ent.label_, sep=" - ")
-
-
-    @staticmethod
-    def view_entities(engine, text):
-
-        # PARSEANDO O TEXTO UTILIZANDO A ENGINE DE NLP
-        doc = engine(text)
-
-        displacy.serve(doc, style="ent")
 
 
