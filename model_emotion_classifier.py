@@ -23,7 +23,7 @@
 
 __version__ = "1.0"
 __author__ = """Emerson V. Rafael (EMERVIN)"""
-__data_atualizacao__ = "03/07/2021"
+__data_atualizacao__ = "03/10/2021"
 
 
 from inspect import stack
@@ -47,7 +47,7 @@ class Emotion_Classifier():
         self.language = settings.LANGUAGE
 
         # 2 - OBTENDO AS PONTUAÇÕES QUE SERÃO RETIRADAS DO MODELO
-        self.pontuacoes = string.punctuation
+        self.punctuations = string.punctuation
 
         # 3 - NOME DAS COLUNAS DO DATAFRAME
         self.column_text = settings.NAME_COLUMN_TEXT
@@ -56,40 +56,6 @@ class Emotion_Classifier():
         # 4 - NOME DAS COLUNAS QUE RECEBERÁO OS RESULTADOS DE PRÉ PROCESSAMENTO
         self.variables = settings.VARIABLES = "texto_formatado"
         self.target = settings.TARGET = "emocao_formatado"
-
-
-    @staticmethod
-    def read_csv(data_dir):
-
-        """
-
-            REALIZA LEITURA DA BASE (CSV)
-
-            # Arguments
-                path_data_train_dir            - Required : Base de dados de
-                                                            treinamento a ser utilizada (String)
-                path_data_test_dir             - Optional : Base de dados de
-                                                            teste a ser utilizada (String)
-            # Returns
-                validador                      - Required : Validação da função (Boolean)
-                model_result                   - Required : Resultado do modelo (Model)
-
-        """
-
-        # INICIANDO O VALIDADOR
-        validador = False
-
-        # INICIANDO O DATAFRAME DE RESULTADO DA LEITURA
-        dataframe = pd.DataFrame()
-
-        try:
-            dataframe = pd.read_csv(data_dir, encoding='utf-8')
-
-            validador = True
-        except Exception as ex:
-            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
-
-        return validador, dataframe
 
 
     @staticmethod
@@ -181,20 +147,27 @@ class Emotion_Classifier():
         # INICIANDO A LISTA QUE ARMAZENARÁ AS LEMMATIZAÇÕES
         lista = []
 
-        # CONVERTENDO O TEXTO PARA LOWERCASE
-        # É IMPORTANTE ESSE PADRÃO, PARA O SPACY RECONHECER OS TOKENS
-        texto = text.lower()
-        documento = pln(texto)
+        try:
+            # CONVERTENDO O TEXTO PARA LOWERCASE
+            # É IMPORTANTE ESSE PADRÃO, PARA O SPACY RECONHECER OS TOKENS
+            texto = text.lower()
+            documento = pln(texto)
 
-        # PERCORRENDO TODOS OS TOKENS E OBTENDO AS LEMMARIZAÇÕES
-        # OBTÉM A PALAVRA RAIZ
-        for token in documento:
-            lista.append(token.lemma_)
+            # PERCORRENDO TODOS OS TOKENS E OBTENDO AS LEMMARIZAÇÕES
+            # OBTÉM A PALAVRA RAIZ
+            for token in documento:
+                lista.append(token.lemma_)
 
-        # RETIRANDO STOP WORDS, PONTUAÇÕES E NÚMEROS
-        texto_formatted = ' '.join([palavra for palavra in lista if palavra not in STOP_WORDS and palavra not in pontuactions and not palavra.isdigit()])
+            # RETIRANDO STOP WORDS, PONTUAÇÕES E NÚMEROS
+            texto_formatted = ' '.join([palavra for palavra in lista if
+                                        palavra not in STOP_WORDS and palavra not in pontuactions and not palavra.isdigit()])
 
-        return texto_formatted
+            return texto_formatted
+
+        except Exception as ex:
+            print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        return text
 
 
     @staticmethod
@@ -294,8 +267,8 @@ class Emotion_Classifier():
             # FORMATANDO OS TEXTOS
             # RETIRANDO PONTUAÇÕES E OBTENDO APENAS LEMMATIZAÇÃO
             dataframe[self.variables] = np.vectorize(Emotion_Classifier.pre_processing_dataframe)(dataframe[self.column_text],
-                                                                                                     pln,
-                                                                                                     self.pontuacoes)
+                                                                                                  pln,
+                                                                                                  self.punctuations)
             dataframe[self.target] = dataframe[self.column_emotion].apply(lambda x: Emotion_Classifier.pre_processing_labels(x))
 
             # OBTENDO UMA LISTA COM OS LABELS/TARGETS
