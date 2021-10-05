@@ -77,7 +77,8 @@ def orchestra_model():
             # REALIZANDO O TREINAMENTO DO MODELO
             validador, model, result_model = orchest_model.orchestra_create_classifier(result_pre_processing,
                                                                                        settings.EPOCHS,
-                                                                                       settings.BATCH_SIZE)
+                                                                                       settings.BATCH_SIZE,
+                                                                                       settings.VERBOSE)
 
             if validador:
 

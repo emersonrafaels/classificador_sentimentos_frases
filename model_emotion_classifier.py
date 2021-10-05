@@ -38,6 +38,8 @@ import spacy
 from spacy import displacy
 from spacy.lang.pt.stop_words import STOP_WORDS
 
+from UTILS import generic_functions
+
 
 class Emotion_Classifier():
 
@@ -108,6 +110,10 @@ class Emotion_Classifier():
 
         # INICIANDO O MODELO DO SPACY
         pln = None
+
+        print("REALIZANDO A LEITURA DO MODELO - LANGUAGE: {} - {}".format(self.language,
+                                                                          generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+        print("-" * 50)
 
         # OBTENDO O MODELO
         if self.language == "portuguese":
@@ -264,12 +270,22 @@ class Emotion_Classifier():
 
         if validador:
 
+            print("REALIZANDO O PRÉ PROCESSAMENTO DOS DADOS DO MODELO - {}".format(generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+            print("-" * 50)
+
             # FORMATANDO OS TEXTOS
             # RETIRANDO PONTUAÇÕES E OBTENDO APENAS LEMMATIZAÇÃO
             dataframe[self.variables] = np.vectorize(Emotion_Classifier.pre_processing_dataframe)(dataframe[self.column_text],
                                                                                                   pln,
                                                                                                   self.punctuations)
+
+            print("PRÉ PROCESSAMENTO - LEMATIZAÇÃO - RETIRADA DE PONTUAÇÕES E STOP WORDS - {}".format(generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+            print("-" * 50)
+
             dataframe[self.target] = dataframe[self.column_emotion].apply(lambda x: Emotion_Classifier.pre_processing_labels(x))
+
+            print("PRÉ PROCESSAMENTO - PADRONIZAÇÃO DOS LABELS - {}".format(generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+            print("-" * 50)
 
             # OBTENDO UMA LISTA COM OS LABELS/TARGETS
             validador, list_data_model = Emotion_Classifier.get_dataframe_to_list_label_target(dataframe,
@@ -301,6 +317,10 @@ class Emotion_Classifier():
         # INICIANDO O MODELO
         model = spacy.blank('pt')
 
+        print("CONFIGURANDO O MODELO A SER TREINADO - {}".format(
+            generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+        print("-" * 50)
+
         try:
             # CREATE A PIPELINE
             categories = model.create_pipe(settings.TEXT_CAT)
@@ -321,7 +341,7 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def start_train_model(model, model_data, epochs, batch_size):
+    def start_train_model(model, model_data, epochs, batch_size, verbose):
 
         # INICIANDO O VALIDADOR
         validador = False
@@ -336,6 +356,10 @@ class Emotion_Classifier():
 
         model.begin_training()
 
+        print("INICIANDO O TREINAMENTO DO MODELO - {}".format(
+            generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+        print("-" * 50)
+
         try:
             for epoch in range(epochs):
 
@@ -347,11 +371,21 @@ class Emotion_Classifier():
                 # QUANTIDADE DE BATCHS = TAMANHO_DO_MODELO/BATCHS_SIZE
                 for batch in spacy.util.minibatch(model_data, batch_size):
                     textos = [model(texto) for texto, entities in batch]
+
+                    """
+                        A CADA PALAVRA, O MODELO FAZ UMA PREVISÃO. EM SEGUIDA, 
+                        ELE CONSULTA AS ANOTAÇÕES PARA VERIFICAR SE A 
+                        PREVISÃO ESTÁ CORRETA. SE NÃO FOR, ELE AJUSTA OS PESOS 
+                        PARA QUE A AÇÃO CORRETA TENHA UMA PONTUAÇÃO 
+                        MAIS ALTA NA PRÓXIMA VEZ USANDO UPDATE()
+                    """
+
                     annotations = [{'cats': entities} for texto, entities in batch]
                     model.update(textos, annotations, losses=losses)
 
                 # A CADA
-                if epoch % 10 == 0:
+                if epoch % 100 == 0 and verbose == True:
+                    print("EPOCH: {} - PERDAS: {}".format(epoch, losses))
                     result_epochs_history.append(losses)
                     result_epochs_history_losses.append(losses.get("textcat"))
 
@@ -359,6 +393,10 @@ class Emotion_Classifier():
 
         except Exception as ex:
             print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+
+        print("TREINAMENTO FINALIZADO - STATUS: {} - {}".format(validador,
+                                                                generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+        print("-" * 50)
 
         return validador, model, result_epochs_history, result_epochs_history_losses
 
@@ -374,7 +412,7 @@ class Emotion_Classifier():
 
 
     @staticmethod
-    def orchestra_create_classifier(model_data, epochs, batch_size):
+    def orchestra_create_classifier(model_data, epochs, batch_size, verbose=True):
 
         # INICIANDO O MODELO VÁZIO
         validador, model = Emotion_Classifier.init_model_classifier()
@@ -385,7 +423,8 @@ class Emotion_Classifier():
             validador, model, history_epochs, history_losses = Emotion_Classifier.start_train_model(model,
                                                                                                     model_data,
                                                                                                     epochs,
-                                                                                                    batch_size)
+                                                                                                    batch_size,
+                                                                                                    verbose)
 
             # VISUALIZANDO A PROGRESSÃO DOS ERROS
             Emotion_Classifier.view_losses(history_losses)
@@ -398,6 +437,10 @@ class Emotion_Classifier():
 
         # INICIANDO O VALIDADOR
         validador = False
+
+        print("SALVANDO O MODELO EM: {} - {}".format(dir_save,
+                                                     generic_functions.obtem_date_time("%d/%m/%Y %H:%M:%S")))
+        print("-"*50)
 
         try:
             # SALVANDO O MODELO
