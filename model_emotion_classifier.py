@@ -55,7 +55,7 @@ class Emotion_Classifier():
         self.column_text = settings.NAME_COLUMN_TEXT
         self.column_emotion = settings.NAME_COLUMN_EMOTION
 
-        # 4 - NOME DAS COLUNAS QUE RECEBERÁO OS RESULTADOS DE PRÉ PROCESSAMENTO
+        # 4 - NOME DAS COLUNAS QUE RECEBERÃO OS RESULTADOS DE PRÉ PROCESSAMENTO
         self.variables = settings.VARIABLES
         self.target = settings.TARGET
 
