@@ -383,7 +383,7 @@ class Emotion_Classifier():
                     annotations = [{'cats': entities} for texto, entities in batch]
                     model.update(textos, annotations, losses=losses)
 
-                # A CADA
+                # A CADA EPOCH, ATUALIZANDO OS VALORES DE PERDA
                 if epoch % 100 == 0 and verbose == True:
                     print("EPOCH: {} - PERDAS: {}".format(epoch, losses))
                     result_epochs_history.append(losses)
