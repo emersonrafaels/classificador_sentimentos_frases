@@ -43,7 +43,7 @@ def orchestra_model():
         PARA PRÉ-PROCESSAMENTO SERÃO UTILIZADAS AS TÉCNICAS:
             1) LEMATIZAÇÃO
             2) STOP WORDS
-            3) RETIRAR PONTUAÇÕES
+            3) RETIRAR PONTUAÇÕES E NÚMEROS
             4) TOKENIZAÇÃO.
 
 
@@ -56,7 +56,6 @@ def orchestra_model():
             model_result                   - Required : Resultado do modelo (Model)
 
     """
-
 
     # OBTENDO A BASE DE DADOS DE TREINAMENTO
     path_data_train_dir = settings.PATH_DATA_TRAIN
