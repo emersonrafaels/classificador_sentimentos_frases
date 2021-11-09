@@ -77,7 +77,7 @@ def obtem_date_time(tipo_retorno):
 
     """
 
-    """%Y/%m/%d %H:%M:%S | %Y-%m-%d %H:%M:%S
+    """%d/%m/%Y %H:%M:%S | %Y-%m-%d %H:%M:%S
     Dia: %d
     Mês: %
     Ano: %Y
@@ -94,3 +94,4 @@ def obtem_date_time(tipo_retorno):
         return stfim
     except Exception as ex:
         print("ERRO NA FUNÇÃO {} - {}".format(stack()[0][3], ex))
+        return datetime.datetime.now()
